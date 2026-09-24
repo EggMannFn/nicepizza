@@ -157,6 +157,12 @@ input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;displ
 
 /* ---------- hero ---------- */
 .hero{position:relative;overflow:hidden;contain:paint;background:var(--hero);color:#fff;transition:background-color .4s}
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;opacity:0;transition:opacity 1.2s}
+.vid-on .hero-bg{opacity:1}
+.hero-vid{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
+/* dark red tint: keeps the section red and the text readable */
+.hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(120,14,6,.9) 0%,rgba(120,14,6,.72) 45%,rgba(45,6,2,.62) 100%)}
+@media (max-width:1023px){.hero-bg::after{background:linear-gradient(180deg,rgba(120,14,6,.88) 0%,rgba(110,12,5,.74) 55%,rgba(45,6,2,.6) 100%)}}
 .hero-in{position:relative;padding-top:104px;padding-bottom:78vw}
 @media (min-width:640px){.hero-in{padding-bottom:58vw}}
 @media (min-width:1024px){.hero-in{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center;gap:1.5rem;min-height:max(680px,min(100svh,900px));padding-top:7rem;padding-bottom:7rem}}
@@ -589,6 +595,7 @@ button.dish-main:hover .d-cam{color:var(--accent);opacity:1}
 </div>
 <main id="top">
 <section class="hero" data-hd="red">
+ 
  <div class="wrap hero-in">
   <div class="rise in">
    <p class="status up" style="--d:.05s" data-open><span class="dot"></span><span>Mar–Dom 18:00–21:30</span></p>
@@ -1534,6 +1541,19 @@ var ITEMS={"pizze-margherita":["Margherita",6.0,"impasto","Margherita",1],"pizze
     clearTimeout(rsT);
     rsT = setTimeout(function () { watchHd(); paint(w.pageYOffset, w.innerHeight); }, 150);
   });
+
+  /* ---------- hero background video (only when the file exists) ---------- */
+  var hv = $("hero-vid"), conn = navigator.connection;
+  if (hv && !reduce && !(conn && conn.saveData)) {
+    hv.preload = "auto";
+    hv.addEventListener("playing", function () { hv.closest(".hero").classList.add("vid-on"); }, { once: true });
+    var pv = hv.play();
+    pv && pv.catch && pv.catch(function () {});
+    // pause while the hero is off screen
+    "IntersectionObserver" in w && new IntersectionObserver(function (es) {
+      es[0].isIntersecting ? hv.play().catch(function () {}) : hv.pause();
+    }).observe(hv.parentNode);
+  }
 
   /* ---------- init ---------- */
   setMode(form.mode || "ritiro");
